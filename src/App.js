@@ -1,21 +1,92 @@
 import "./App.css";
 import logo from "./assests/logo.jpg";
-import Discord from "./assests/Discord-Logo-Black.svg";
 import hero from "./assests/heroEmpty.png";
 import live from "./assests/live.png";
 import Moment from "react-moment";
 import { useState, useEffect } from "react";
-import patten1 from "./assests/patten01.png";
-import explain from "./assests/explain.png";
 import ufo from "./assests/UFO.png";
-import id from "./assests/id.png";
-import planet from './assests/planet.png';
-import computer from './assests/computer.png';
+import planet from "./assests/planet.png";
+import { ethers } from 'ethers';
+import myEpicNft from './utils/myEpicNft.json';
+import gallery1 from './assests/NFT/1.png';
+import gallery2 from './assests/NFT/7.png';
+import gallery3 from './assests/NFT/9.png';
+import gallery4 from './assests/NFT/14.png';
+import gallery5 from './assests/NFT/16.png';
+import gallery6 from './assests/NFT/17.png';
+import gallery7 from './assests/NFT/23.png';
+import gallery8 from './assests/NFT/46.png';
 
 function App() {
   const [time, setTime] = useState(new Date());
   const [open, setOpen] = useState(false);
+  const [currentAccount, setCurrentAccount] = useState("");
 
+  const checkIfWalletIsConnected = async () => {
+    const { ethereum } = window;
+
+    if (!ethereum) {
+      console.log("Make sure you have metamask!");
+      return;
+    } else {
+      console.log("Login success!", ethereum);
+    }
+
+    const accounts = await ethereum.request({ method: "eth_accounts" });
+    if (accounts.length !== 0) {
+      const account = accounts[0];
+      console.log("Found an authorized accounts", account);
+      setCurrentAccount(account);
+    } else {
+      console.log("No authroized account found");
+    }
+  };
+
+  const connectWallet = async () => {
+    try {
+      const { ethereum } = window;
+
+      if (!ethereum) {
+        alert("get metaMask!");
+        return;
+      }
+
+      const accounts = await ethereum.request({
+        method: "eth_requestAccounts",
+      });
+      console.log("Connected", accounts[0]);
+      setCurrentAccount(accounts[0]);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const mintNFT = async () => {
+    const CONTRACT_ADDRESS = "0xC8e844E8b560e88a3Bbf0C49455B2d17698BA035"
+    try{
+      const {ethereum} = window;
+
+      if(ethereum) {
+        const provider =new ethers.providers.Web3Provider(ethereum);
+        const signer = provider.getSigner();
+        const connectedContract = new ethers.Contract(CONTRACT_ADDRESS,myEpicNft,signer)
+
+        let nftTxn = await connectedContract.mintNicMeta(1);
+        console.log('Mining......');
+        await nftTxn.wait();
+        console.log(`Mined, see transaction: https://rinkeby.etherscan.io/tx/${nftTxn.hash}`);
+      }
+      else{
+        console.log('Ethereum object do not exist');
+      }
+      
+    } catch(error) {
+      console.log(error);
+    }
+  }
+  useEffect(() => {
+    checkIfWalletIsConnected();
+  }, []);
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
     return function cleanup() {
@@ -100,11 +171,16 @@ function App() {
                   </defs>
                 </svg>
               </a>
+              {currentAccount ==="" ?            <button className="border rounded-sm	 bg-gradient-to-r from-cyan-500 to-green-500 w-40 h-12" onClick={connectWallet}>        <p class="font-extrabold text-md  text-white ">
+                  Coneect Wallet
+            </p>
+    </button>:<p>{currentAccount}</p>
+}
             </div>
 
             {/* <!-- mobile button goes here --> */}
             <div class="md:hidden flex items-center">
-              <button class="mobile-menu-button" onClick={()=>setOpen(!open)}>
+              <button class="mobile-menu-button" onClick={() => setOpen(!open)}>
                 <svg
                   class="w-6 h-6"
                   xmlns="http://www.w3.org/2000/svg"
@@ -127,9 +203,8 @@ function App() {
         {/* <!-- mobile menu --> */}
         {open ? (
           <div class="mobile-menu mx-3 md:hidden">
-              <a href="">
+            <a href="">
               <div className="flex">
-
                 <svg
                   class="h-8 w-8 text-green-300"
                   viewBox="0 0 24 24"
@@ -145,10 +220,10 @@ function App() {
                   <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
                 </svg>
                 <p className="mx-3 text-green-300">Instagram</p>
-                </div>
-              </a>
-              <a href="">
-                <div className="flex">
+              </div>
+            </a>
+            <a href="">
+              <div className="flex">
                 <svg
                   class="h-8 w-8 text-green-300"
                   viewBox="0 0 24 24"
@@ -162,13 +237,10 @@ function App() {
                   <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z" />
                 </svg>
                 <p className="mx-3 text-green-300">Twitter</p>
-
-                </div>
-               
-              </a>
-              <a href="">
+              </div>
+            </a>
+            <a href="">
               <div className="flex">
-
                 <svg
                   className="w-8 h-8 fill-green-200"
                   width="71"
@@ -186,9 +258,9 @@ function App() {
                   </defs>
                 </svg>
                 <p className="mx-3 text-green-300">Discord</p>
-                </div>
-
-              </a>          </div>
+              </div>
+            </a>
+          </div>
         ) : (
           <div class="mobile-menu hidden md:hidden">
             <a href="#" class="block py-2 px-4 text-sm hover:bg-gray-200">
@@ -205,6 +277,15 @@ function App() {
       <div class="py-16 text-center">
         <img src={hero} alt="" className="max-w-120" />
         {/* <h2 class="font-extrabold text-4xl">Navbars in Tailwind!</h2> */}
+        <h1 class="py-4 text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-green-600 to-green-700">Mint is now available</h1>
+
+        {currentAccount === "" ? (
+          <></>
+        ) : (
+          <button className="border bg-gradient-to-r from-cyan-500 to-blue-500 w-40 h-12" onClick={mintNFT}>
+            <p class="font-extrabold text-xl  text-white ">Mint NFT</p>
+          </button>
+        )}
       </div>
       {/* <!-- live studio --> */}
       <div>
@@ -249,7 +330,7 @@ function App() {
             </h1>
             <div class="mx-auto mb-4  lg:mx-0 w-1/2 pt-3 border-b-4 border-black opacity-25"></div>
 
-            <p className="mt-6 mb-8 text-lg sm:mb-12">
+            <p className="mt-6 mb-8 font-bold text-lg sm:mb-12">
               這世界正在崩解，跳脫了原本的想像，你
               以為的迪士尼樂園只是一個幻想，實際上
               根本沒有那麼美好，只需加點調味料或是
@@ -271,14 +352,61 @@ function App() {
         </div>
       </section>
 
-      <div class="max-w-6xl mx-auto py-16 px-4">
-        <h1 className="text-center font-extrabold text-6xl">Explain</h1>
-        <div className="flex justify-center">
-          <div class="mx-auto mb-4  lg:mx-0 w-1/2 pt-3 border-b-4 border-black opacity-25"></div>
+      <section className="dark:bg-coolGray-800 dark:text-coolGray-100">
+        <div className="container flex flex-col justify-center p-6 mx-auto  lg:flex-row ">
+          <div className="flex items-center justify-center p-6 mt-8 lg:mt-0 h-72 sm:h-80 lg:h-96 xl:h-112 2xl:h-128">
+            <img
+              src={planet}
+              alt=""
+              className="object-contain h-72 sm:h-80 lg:h-96 xl:h-112 2xl:h-128"
+            />
+          </div>
+          <div className="flex flex-col justify-center p-6 text-center rounded-sm lg:max-w-md xl:max-w-lg lg:text-left">
+            <h1 className="text-5xl font-bold leading-none sm:text-6xl">
+            mystery boxes
+            </h1>
+
+            <p className="mt-6 mb-8 font-bold text-lg sm:mb-12">
+              you can check your unique NFT on April 1
+            </p>
+          </div>
+
         </div>
-        <img src={explain} className="h-88 w-full" alt="" />
-        {/* <div className="w-48 h-48 bg-gray-400 "></div> */}
-      </div>
+      </section>
+
+{/** show image*/}
+
+<section class="p-6 bg-coolGray-100 text-coolGray-800">
+	<div class="container p-4 mx-auto text-center">
+		<h2 class="text-4xl font-bold">NFT gallery</h2>
+	</div>
+	<div class="container flex flex-wrap justify-center mx-auto text-coolGray-600">
+		<div class="flex justify-center w-1/2 p-6 align-middle md:w-1/3 xl:w-1/4">
+      <img src={gallery1} alt="" />
+		</div>
+		<div class="flex justify-center w-1/2 p-6 align-middle md:w-1/3 xl:w-1/4">
+    <img src={gallery2} alt="" />
+		</div>
+		<div class="flex justify-center w-1/2 p-6 align-middle md:w-1/3 xl:w-1/4">
+    <img src={gallery3} alt="" />
+		</div>
+		<div class="flex justify-center w-1/2 p-6 align-middle md:w-1/3 xl:w-1/4">
+    <img src={gallery4} alt="" />
+		</div>
+		<div class="flex justify-center w-1/2 p-6 align-middle md:w-1/3 xl:w-1/4">
+    <img src={gallery5} alt="" />
+		</div>
+		<div class="flex justify-center w-1/2 p-6 align-middle md:w-1/3 xl:w-1/4">
+    <img src={gallery6} alt="" />
+		</div>
+		<div class="flex justify-center w-1/2 p-6 align-middle md:w-1/3 xl:w-1/4">
+    <img src={gallery7} alt="" />
+		</div>
+		<div class="flex justify-center w-1/2 p-6 align-middle md:w-1/3 xl:w-1/4">
+    <img src={gallery8} alt="" />
+		</div>
+	</div>
+</section>
     </div>
   );
 }
