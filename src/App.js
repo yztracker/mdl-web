@@ -6,21 +6,22 @@ import Moment from "react-moment";
 import { useState, useEffect } from "react";
 import ufo from "./assests/UFO.png";
 import planet from "./assests/planet.png";
-import { ethers } from 'ethers';
-import myEpicNft from './utils/myEpicNft.json';
-import gallery1 from './assests/NFT/1.png';
-import gallery2 from './assests/NFT/7.png';
-import gallery3 from './assests/NFT/9.png';
-import gallery4 from './assests/NFT/14.png';
-import gallery5 from './assests/NFT/16.png';
-import gallery6 from './assests/NFT/17.png';
-import gallery7 from './assests/NFT/23.png';
-import gallery8 from './assests/NFT/46.png';
+import { ethers } from "ethers";
+import myEpicNft from "./utils/myEpicNft.json";
+import gallery1 from "./assests/NFT/1.png";
+import gallery2 from "./assests/NFT/7.png";
+import gallery3 from "./assests/NFT/9.png";
+import gallery4 from "./assests/NFT/14.png";
+import gallery5 from "./assests/NFT/16.png";
+import gallery6 from "./assests/NFT/17.png";
+import gallery7 from "./assests/NFT/23.png";
+import gallery8 from "./assests/NFT/46.png";
 
 function App() {
   const [time, setTime] = useState(new Date());
   const [open, setOpen] = useState(false);
   const [currentAccount, setCurrentAccount] = useState("");
+  const CONTRACT_ADDRESS = "0xC8e844E8b560e88a3Bbf0C49455B2d17698BA035";
 
   const checkIfWalletIsConnected = async () => {
     const { ethereum } = window;
@@ -55,6 +56,7 @@ function App() {
         method: "eth_requestAccounts",
       });
       console.log("Connected", accounts[0]);
+
       setCurrentAccount(accounts[0]);
     } catch (error) {
       console.log(error);
@@ -62,28 +64,39 @@ function App() {
   };
 
   const mintNFT = async () => {
-    const CONTRACT_ADDRESS = "0xC8e844E8b560e88a3Bbf0C49455B2d17698BA035"
-    try{
-      const {ethereum} = window;
+    try {
+      const { ethereum } = window;
 
-      if(ethereum) {
-        const provider =new ethers.providers.Web3Provider(ethereum);
+      let chainId = await ethereum.request({ method: "eth_chainId" });
+      console.log("Connected to chain " + chainId);
+
+      const rinkebyChainId = "0x4";
+      if (chainId !== rinkebyChainId) {
+        alert("You are not connected to the Rinkeby Test Network!");
+      }
+
+      if (ethereum) {
+        const provider = new ethers.providers.Web3Provider(ethereum);
         const signer = provider.getSigner();
-        const connectedContract = new ethers.Contract(CONTRACT_ADDRESS,myEpicNft,signer)
+        const connectedContract = new ethers.Contract(
+          CONTRACT_ADDRESS,
+          myEpicNft,
+          signer
+        );
 
         let nftTxn = await connectedContract.mintNicMeta(1);
-        console.log('Mining......');
+        console.log("Mining......");
         await nftTxn.wait();
-        console.log(`Mined, see transaction: https://rinkeby.etherscan.io/tx/${nftTxn.hash}`);
+        console.log(
+          `Mined, see transaction: https://rinkeby.etherscan.io/tx/${nftTxn.hash}`
+        );
+      } else {
+        console.log("Ethereum object do not exist");
       }
-      else{
-        console.log('Ethereum object do not exist');
-      }
-      
-    } catch(error) {
+    } catch (error) {
       console.log(error);
     }
-  }
+  };
   useEffect(() => {
     checkIfWalletIsConnected();
   }, []);
@@ -171,11 +184,19 @@ function App() {
                   </defs>
                 </svg>
               </a>
-              {currentAccount ==="" ?            <button className="border rounded-sm	 bg-gradient-to-r from-cyan-500 to-green-500 w-40 h-12" onClick={connectWallet}>        <p class="font-extrabold text-md  text-white ">
-                  Coneect Wallet
-            </p>
-    </button>:<p>{currentAccount}</p>
-}
+              {currentAccount === "" ? (
+                <button
+                  className="border rounded-sm	 bg-gradient-to-r from-cyan-500 to-green-500 w-40 h-12"
+                  onClick={connectWallet}
+                >
+                  {" "}
+                  <p class="font-extrabold text-md  text-white ">
+                    Coneect Wallet
+                  </p>
+                </button>
+              ) : (
+                <p>{currentAccount}</p>
+              )}
             </div>
 
             {/* <!-- mobile button goes here --> */}
@@ -277,12 +298,17 @@ function App() {
       <div class="py-16 text-center">
         <img src={hero} alt="" className="max-w-120" />
         {/* <h2 class="font-extrabold text-4xl">Navbars in Tailwind!</h2> */}
-        <h1 class="py-4 text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-green-600 to-green-700">Mint is now available</h1>
+        <h1 class="py-4 text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-green-600 to-green-700">
+          Mint is now available
+        </h1>
 
         {currentAccount === "" ? (
           <></>
         ) : (
-          <button className="border bg-gradient-to-r from-cyan-500 to-blue-500 w-40 h-12" onClick={mintNFT}>
+          <button
+            className="border bg-gradient-to-r from-cyan-500 to-blue-500 w-40 h-12"
+            onClick={mintNFT}
+          >
             <p class="font-extrabold text-xl  text-white ">Mint NFT</p>
           </button>
         )}
@@ -363,50 +389,49 @@ function App() {
           </div>
           <div className="flex flex-col justify-center p-6 text-center rounded-sm lg:max-w-md xl:max-w-lg lg:text-left">
             <h1 className="text-5xl font-bold leading-none sm:text-6xl">
-            mystery boxes
+              mystery boxes
             </h1>
 
             <p className="mt-6 mb-8 font-bold text-lg sm:mb-12">
               you can check your unique NFT on April 1
             </p>
           </div>
-
         </div>
       </section>
 
-{/** show image*/}
+      {/** show image*/}
 
-<section class="p-6 bg-coolGray-100 text-coolGray-800">
-	<div class="container p-4 mx-auto text-center">
-		<h2 class="text-4xl font-bold">NFT gallery</h2>
-	</div>
-	<div class="container flex flex-wrap justify-center mx-auto text-coolGray-600">
-		<div class="flex justify-center w-1/2 p-6 align-middle md:w-1/3 xl:w-1/4">
-      <img src={gallery1} alt="" />
-		</div>
-		<div class="flex justify-center w-1/2 p-6 align-middle md:w-1/3 xl:w-1/4">
-    <img src={gallery2} alt="" />
-		</div>
-		<div class="flex justify-center w-1/2 p-6 align-middle md:w-1/3 xl:w-1/4">
-    <img src={gallery3} alt="" />
-		</div>
-		<div class="flex justify-center w-1/2 p-6 align-middle md:w-1/3 xl:w-1/4">
-    <img src={gallery4} alt="" />
-		</div>
-		<div class="flex justify-center w-1/2 p-6 align-middle md:w-1/3 xl:w-1/4">
-    <img src={gallery5} alt="" />
-		</div>
-		<div class="flex justify-center w-1/2 p-6 align-middle md:w-1/3 xl:w-1/4">
-    <img src={gallery6} alt="" />
-		</div>
-		<div class="flex justify-center w-1/2 p-6 align-middle md:w-1/3 xl:w-1/4">
-    <img src={gallery7} alt="" />
-		</div>
-		<div class="flex justify-center w-1/2 p-6 align-middle md:w-1/3 xl:w-1/4">
-    <img src={gallery8} alt="" />
-		</div>
-	</div>
-</section>
+      <section class="p-6 bg-coolGray-100 text-coolGray-800">
+        <div class="container p-4 mx-auto text-center">
+          <h2 class="text-4xl font-bold">NFT gallery</h2>
+        </div>
+        <div class="container flex flex-wrap justify-center mx-auto text-coolGray-600">
+          <div class="flex justify-center w-1/2 p-6 align-middle md:w-1/3 xl:w-1/4">
+            <img src={gallery1} alt="" />
+          </div>
+          <div class="flex justify-center w-1/2 p-6 align-middle md:w-1/3 xl:w-1/4">
+            <img src={gallery2} alt="" />
+          </div>
+          <div class="flex justify-center w-1/2 p-6 align-middle md:w-1/3 xl:w-1/4">
+            <img src={gallery3} alt="" />
+          </div>
+          <div class="flex justify-center w-1/2 p-6 align-middle md:w-1/3 xl:w-1/4">
+            <img src={gallery4} alt="" />
+          </div>
+          <div class="flex justify-center w-1/2 p-6 align-middle md:w-1/3 xl:w-1/4">
+            <img src={gallery5} alt="" />
+          </div>
+          <div class="flex justify-center w-1/2 p-6 align-middle md:w-1/3 xl:w-1/4">
+            <img src={gallery6} alt="" />
+          </div>
+          <div class="flex justify-center w-1/2 p-6 align-middle md:w-1/3 xl:w-1/4">
+            <img src={gallery7} alt="" />
+          </div>
+          <div class="flex justify-center w-1/2 p-6 align-middle md:w-1/3 xl:w-1/4">
+            <img src={gallery8} alt="" />
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
